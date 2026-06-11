@@ -64,14 +64,33 @@
     <h1>🤖 ChatGPT Jr</h1>
 
     <div class="messages">
-        <p>Hello Abinesh 👋</p>
-        <p>I am ChatGPT Jr.</p>
+<p>Hello Abinesh 👋</p>
+<p>I am ChatGPT Jr.</p>
+
+{% if user_message %}
+<p><strong>You:</strong> {{ user_message }}</p>
+{% endif %}
+
+{% if bot_response %}
+<p><strong>AI:</strong> {{ bot_response }}</p>
+{% endif %}
     </div>
 
+    <form method="POST">
+    {% csrf_token %}
+
     <div class="input-area">
-        <input type="text" placeholder="Type your message...">
-        <button>Send</button>
+        <input
+            type="text"
+            name="message"
+            placeholder="Type your message..."
+        >
+
+        <button type="submit">
+            Send
+        </button>
     </div>
+</form>
 
 </div>
 
