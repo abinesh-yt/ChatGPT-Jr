@@ -1,0 +1,461 @@
+body{
+    margin:0;
+     background:linear-gradient(
+        135deg,
+        #0a0a0a,
+        #111827
+    );
+    color:white;
+    font-family:Arial, sans-serif;
+    overflow:hidden;
+}
+
+/* APP */
+.app-container{
+    display:flex;
+    width:100vw;
+    height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    position:fixed;
+    top:0;
+    left:-320px;
+    width:300px;
+    height:100vh;
+
+    background:#111827;
+border-right:1px solid #1f2937;
+
+    padding:20px;
+    box-sizing:border-box;
+
+    transition:0.3s ease;
+    z-index:1000;
+}
+
+.sidebar.show{
+    left:0;
+}
+
+.sidebar h2{
+    margin-bottom:20px;
+}
+
+.logo{
+    font-size:32px;
+    margin-right:10px;
+}
+
+.new-chat-btn{
+    display:block;
+
+    background:#2563eb;
+    color:white;
+
+    text-decoration:none;
+    text-align:center;
+
+    padding:12px;
+    border-radius:10px;
+
+    margin-bottom:20px;
+}
+
+.chat-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.chat-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.chat-item{
+    flex:1;
+
+    background:#1e293b;
+    color:white;
+
+    text-decoration:none;
+
+    padding:12px;
+    border-radius:10px;
+
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
+.chat-item:hover{
+    background:#334155;
+}
+
+.active-chat{
+    border:2px solid #3b82f6;
+}
+
+.delete-btn{
+    color:white;
+    text-decoration:none;
+    font-size:18px;
+}
+
+/* MENU BUTTON */
+
+#toggleSidebar{
+    position:fixed;
+
+    top:15px;
+    left:15px;
+
+    width:50px;
+    height:50px;
+
+    border:none;
+    border-radius:12px;
+
+    background:transparent;
+    color:white;
+
+    font-size:24px;
+    cursor:pointer;
+
+    z-index:2000;
+}
+
+/* MAIN CHAT */
+
+.main-chat{
+    width:100%;
+    height:100vh;
+
+    display:flex;
+    flex-direction:column;
+
+    padding:10px 20px;
+    box-sizing:border-box;
+}
+
+
+h1{
+    text-align:center;
+    font-size:32px;
+    color:white;
+     margin:10px 0;
+
+    text-shadow:
+        0 0 10px rgba(37,99,235,.4),
+        0 0 20px rgba(37,99,235,.2);
+}
+
+/* MESSAGES */
+
+.messages{
+    flex:1;
+
+    border:1px solid #334155;
+    border-radius:12px;
+
+    padding:5px 10px;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+}
+
+/* USER */
+
+.user-container{
+    display:flex;
+    justify-content:flex-end;
+    margin:15px 0;
+}
+
+.user-message{
+    display:inline-block;
+
+    max-width:70%;
+
+    padding:16px 20px;
+
+    border-radius:20px;
+
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #3b82f6
+    );
+
+    color:white;
+
+    white-space:pre-wrap;
+    word-wrap:break-word;
+    overflow-wrap:break-word;
+
+    width:fit-content;
+
+    margin-left:auto;
+}
+
+/* AI */
+
+.ai-container{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+
+    margin:15px 0;
+}
+
+.avatar{
+    width:35px;
+    height:35px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:#2563eb;
+    border-radius:50%;
+
+    flex-shrink:0;
+}
+
+.ai-message{
+    background:#1f2937;
+border:1px solid #374151;
+
+    padding:15px;
+    border-radius:18px;
+
+    max-width:70%;
+
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+
+/* INPUT */
+
+.input-area{
+    display:flex;
+    gap:10px;
+
+    margin-top:10px;
+}
+
+.input-area input{
+    flex:1;
+
+    padding:15px;
+
+    
+    border-radius:12px;
+
+    background:#111827;
+    border:1px solid #1f2937;
+    color:white;
+
+    outline:none;
+}
+
+.input-area button{
+    background:#2563eb;
+    color:white;
+
+    border:none;
+
+    padding:12px 20px;
+    border-radius:10px;
+
+    cursor:pointer;
+}
+
+/* SCROLLBAR */
+
+::-webkit-scrollbar{
+    width:8px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#475569;
+    border-radius:10px;
+}
+
+::-webkit-scrollbar-track{
+    background:#1e293b;
+}
+
+/* ANIMATION */
+
+.user-message,
+.ai-message{
+    animation:fadeIn .25s ease;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+    h1{
+        font-size:28px;
+    }
+
+    .sidebar{
+        width:260px;
+        left:-280px;
+    }
+
+    .user-message,
+    .ai-message{
+        max-width:90%;
+    }
+}
+
+.menu-btn,
+.close-btn{
+    position:fixed;
+    top:15px;
+
+    width:50px;
+    height:50px;
+
+    border:none;
+    border-radius:12px;
+
+    background:transparent;
+    color:white;
+
+    font-size:30px;
+    cursor:pointer;
+
+    z-index:2000;
+}
+
+.menu-btn{
+    left:15px;
+}
+
+.close-btn{
+    left:240px;
+    display:none;
+}
+
+.bg-grid{
+    position:fixed;
+    inset:0;
+
+    background-image:
+    linear-gradient(
+        rgba(255,255,255,.03) 1px,
+        transparent 1px
+    ),
+    linear-gradient(
+        90deg,
+        rgba(255,255,255,.03) 1px,
+        transparent 1px
+    );
+
+    background-size:40px 40px;
+
+    z-index:-1;
+}
+
+.ai-message pre{
+    background:#0f172a;
+    padding:15px;
+    border-radius:10px;
+    overflow-x:auto;
+    margin-top:10px;
+}
+
+.ai-message code{
+    color:#60a5fa;
+    font-family:Consolas, monospace;
+}
+
+.ai-message h1,
+.ai-message h2,
+.ai-message h3{
+    margin-top:10px;
+}
+
+.ai-message ul{
+    padding-left:20px;
+}
+
+pre{
+    background:#0f172a;
+    padding:15px;
+    border-radius:12px;
+    overflow-x:auto;
+    margin-top:10px;
+}
+
+code{
+    font-family:Consolas, monospace;
+    color:#60a5fa;
+}
+
+.ai-message pre{
+    background:#0f172a;
+    border:1px solid #334155;
+
+    padding:15px;
+    border-radius:12px;
+
+    overflow-x:auto;
+
+    margin-top:10px;
+}
+
+.ai-message code{
+    font-family:Consolas, monospace;
+    color:#60a5fa;
+}
+
+.ai-message p{
+    margin:8px 0;
+}
+
+.ai-message ul,
+.ai-message ol{
+    padding-left:20px;
+}
+#message-input{
+    flex:1;
+
+    min-height:50px;
+    max-height:150px;
+
+    resize:none;
+
+    padding:15px;
+
+    border-radius:12px;
+
+    background:#111827;
+    border:1px solid #1f2937;
+
+    color:white;
+
+    outline:none;
+
+    font-family:inherit;
+    font-size:16px;
+}

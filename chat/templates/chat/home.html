@@ -1,98 +1,131 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>ChatGPT Jr</title>
 
-    <style>
-        body{
-            background:#0f172a;
-            color:white;
-            font-family:Arial;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            height:100vh;
-        }
-
-        .chat-box{
-            width:700px;
-            height:500px;
-            background:#1e293b;
-            border-radius:15px;
-            padding:20px;
-        }
-
-        h1{
-            text-align:center;
-        }
-
-        .messages{
-            height:350px;
-            border:1px solid #334155;
-            padding:10px;
-            border-radius:10px;
-            overflow-y:auto;
-        }
-
-        .input-area{
-            margin-top:15px;
-            display:flex;
-        }
-
-        input{
-            flex:1;
-            padding:12px;
-            border:none;
-            border-radius:8px;
-        }
-
-        button{
-            margin-left:10px;
-            padding:12px 20px;
-            border:none;
-            border-radius:8px;
-            cursor:pointer;
-        }
-    </style>
-
+    <link rel="stylesheet" href="{% static 'chat/css/style.css' %}">
 </head>
 
 <body>
+    <div class="bg-grid"></div>
 
-<div class="chat-box">
+<button id="toggleSidebar" class="menu-btn">
+    ☰
+</button>
 
-    <h1>🤖 ChatGPT Jr</h1>
+<button id="closeSidebar" class="close-btn">
+    ✕
+</button>
 
-    <div class="messages">
-<p>Hello Abinesh 👋</p>
-<p>I am ChatGPT Jr.</p>
+<div class="app-container">
 
-{% if user_message %}
-<p><strong>You:</strong> {{ user_message }}</p>
-{% endif %}
+    <!-- Sidebar -->
+    <div class="sidebar">
 
-{% if bot_response %}
-<p><strong>AI:</strong> {{ bot_response }}</p>
-{% endif %}
+        <h2>⚡ ChatGPT Jr</h2>
+
+        <a href="{% url 'new_chat' %}" class="new-chat-btn">
+            + New Chat
+        </a>
+
+        <div class="chat-list">
+
+            {% for c in chats %}
+
+            <div class="chat-row">
+
+                <a href="{% url 'chat' c.id %}"
+                   class="chat-item {% if c.id == chat.id %}active-chat{% endif %}">
+
+                    {{ c.title|default:"New Chat"|truncatechars:20 }}
+
+                </a>
+
+                <a href="{% url 'delete_chat' c.id %}"
+                   class="delete-btn"
+                   onclick="return confirm('Delete this chat?')">
+
+                    ❌
+
+                </a>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
     </div>
 
-    <form method="POST">
-    {% csrf_token %}
+    <!-- Main Chat Area -->
+    <div class="main-chat">
 
-    <div class="input-area">
-        <input
-            type="text"
-            name="message"
-            placeholder="Type your message..."
-        >
+        <h1>
+    <span class="logo">⚡</span>
+    ChatGPT Jr
+</h1>
 
-        <button type="submit">
-            Send
-        </button>
+        <div class="messages" id="messages">
+
+            {% for msg in messages %}
+
+            <!-- User Message -->
+            <div class="user-container">
+
+                <div class="user-message">
+                    {{ msg.user_message }}
+                </div>
+
+            </div>
+
+            <!-- AI Message -->
+            <div class="ai-container">
+
+                <div class="avatar">
+                    ⚡
+                </div>
+
+                <div class="ai-message">
+                    {{ msg.bot_response|safe }}
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        <form id="chat-form">
+
+            {% csrf_token %}
+
+            <div class="input-area">
+
+               <textarea
+    id="message-input"
+    name="message"
+    placeholder="Message ChatGPT Jr..."
+    required
+></textarea>
+
+                <button type="submit">
+                    Send
+                </button>
+
+            </div>
+
+        </form>
+
     </div>
-</form>
 
 </div>
+<script>
+const CHAT_ID = "{{ chat.id }}";
+</script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script src="{% static 'chat/js/script.js' %}"></script>
 
 </body>
 </html>
