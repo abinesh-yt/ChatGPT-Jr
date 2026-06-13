@@ -1,4 +1,32 @@
+
 {% load static %}
+<script>
+
+function renameChat(chatId,currentTitle){
+
+    const newTitle = window.prompt(
+    "Rename Chat",
+    currentTitle
+);
+
+    if(!newTitle) return;
+
+    const form =
+        document.getElementById(
+            "renameForm"
+        );
+
+    form.action =
+        `/rename-chat/${chatId}/`;
+
+    document.getElementById(
+        "renameInput"
+    ).value = newTitle;
+
+    form.submit();
+}
+
+</script>
 <!DOCTYPE html>
 <html>
 <head>
@@ -22,12 +50,17 @@
 
     <!-- Sidebar -->
     <div class="sidebar">
+        
 
         <h2>⚡ ChatGPT Jr</h2>
 
-        <a href="{% url 'new_chat' %}" class="new-chat-btn">
-            + New Chat
-        </a>
+<div class="user-info">
+    👤 {{ request.user.username }}
+</div>
+
+<a href="{% url 'new_chat' %}" class="new-chat-btn">
+    + New Chat
+</a>
 
         <div class="chat-list">
 
@@ -35,22 +68,73 @@
 
             <div class="chat-row">
 
-                <a href="{% url 'chat' c.id %}"
-                   class="chat-item {% if c.id == chat.id %}active-chat{% endif %}">
+<a
+    href="{% url 'chat' c.id %}"
+    class="chat-item {% if c.id == chat.id %}active-chat{% endif %}"
+    id="title-view-{{ c.id }}">
 
-                    {{ c.title|default:"New Chat"|truncatechars:20 }}
+    {{ c.title|truncatechars:20 }}
 
-                </a>
+</a>
 
-                <a href="{% url 'delete_chat' c.id %}"
-                   class="delete-btn"
-                   onclick="return confirm('Delete this chat?')">
+<form
+    id="rename-form-{{ c.id }}"
+    class="rename-form"
+    action="{% url 'rename_chat' c.id %}"
+    method="post">
 
-                    ❌
+    {% csrf_token %}
 
-                </a>
+    <input
+        type="text"
+        name="title"
+        class="rename-input"
+        value="{{ c.title }}"
+        onkeydown="handleRename(event,'{{ c.id }}')">
 
-            </div>
+</form>
+
+  <button
+    class="rename-btn"
+    onclick="startRename('{{ c.id }}')">
+
+    ✏️
+
+</button>
+
+<form
+    id="rename-form-{{ c.id }}"
+    class="rename-form"
+    action="{% url 'rename_chat' c.id %}"
+    method="post">
+
+    {% csrf_token %}
+
+    <input
+        type="text"
+        name="title"
+        class="rename-input"
+        value="{{ c.title }}">
+
+    <button
+        type="submit"
+        class="save-btn">
+
+        ✔
+
+    </button>
+
+</form>
+
+    <a href="{% url 'delete_chat' c.id %}"
+       class="delete-btn"
+       onclick="return confirm('Delete this chat?')">
+
+        ❌
+
+    </a>
+
+</div>
 
             {% endfor %}
 
@@ -86,9 +170,9 @@
                     ⚡
                 </div>
 
-                <div class="ai-message">
-                    {{ msg.bot_response|safe }}
-                </div>
+                <div class="ai-message markdown-content">
+    {{ msg.bot_response }}
+</div>
 
             </div>
 
@@ -96,26 +180,32 @@
 
         </div>
 
-        <form id="chat-form">
+<form
+    id="chat-form"
+    enctype="multipart/form-data">
 
-            {% csrf_token %}
+    {% csrf_token %}
 
-            <div class="input-area">
+    <div class="input-area">
 
-               <textarea
-    id="message-input"
-    name="message"
-    placeholder="Message ChatGPT Jr..."
-    required
-></textarea>
+        <input
+            type="file"
+            id="file-input"
+            name="file">
 
-                <button type="submit">
-                    Send
-                </button>
+        <textarea
+            id="message-input"
+            name="message"
+            placeholder="Message ChatGPT Jr..."
+        ></textarea>
 
-            </div>
+        <button type="submit">
+            Send
+        </button>
 
-        </form>
+    </div>
+
+</form>
 
     </div>
 
@@ -124,8 +214,35 @@
 const CHAT_ID = "{{ chat.id }}";
 </script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
 <script src="{% static 'chat/js/script.js' %}"></script>
+
+<form id="renameForm"
+      method="post">
+
+    {% csrf_token %}
+
+    <input
+        type="text"
+        name="title"
+        id="renameInput"
+        placeholder="New title">
+
+</form>
+
+    {% csrf_token %}
+
+    <input
+    type="text"
+    name="title"
+    id="renameInput"
+    placeholder="Enter new chat title">
+
+</form>
 
 </body>
 </html>
