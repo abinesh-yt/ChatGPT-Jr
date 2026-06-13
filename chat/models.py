@@ -57,10 +57,7 @@ class UploadedFile(models.Model):
         upload_to="uploads/"
     )
 
-    extracted_text = models.TextField(
-        blank=True,
-        null=True
-    )
+   
 
     uploaded_at = models.DateTimeField(
         auto_now_add=True

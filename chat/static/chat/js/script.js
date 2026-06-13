@@ -349,7 +349,7 @@ function typeMessage(element, text){
 
         i++;
 
-    }, 30);
+    }, 15);
 
 }
 

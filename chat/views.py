@@ -42,7 +42,7 @@ def get_groq_client():
     return Groq(
         api_key=os.getenv("GROQ_API_KEY")
     )
-client = get_groq_client()
+
 @login_required
 def home(request, chat_id=None):
 
@@ -185,63 +185,48 @@ def rename_chat(request, chat_id):
 @login_required
 def send_message(request, chat_id):
 
-    if request.method == "POST":
+    if request.method != "POST":
+        return JsonResponse({
+            "error": "Invalid request"
+        })
 
-        chat = ChatSession.objects.get(
-    id=chat_id,
-    user=request.user
-)
+    chat = ChatSession.objects.get(
+        id=chat_id,
+        user=request.user
+    )
 
-        user_message = request.POST.get("message")
-        uploaded_file = request.FILES.get("file")
-        print("FILE RECEIVED:", uploaded_file)
+    user_message = request.POST.get("message", "").strip()
+    uploaded_file = request.FILES.get("file")
 
-        pdf_text = ""
-        latest_pdf = UploadedFile.objects.filter(
-            chat=chat
-        ).order_by("-uploaded_at").first()
+    pdf_text = ""
 
-        if latest_pdf and latest_pdf.extracted_text:
+    # Load previously uploaded PDF text
+    latest_pdf = UploadedFile.objects.filter(
+        chat=chat
+    ).order_by("-uploaded_at").first()
 
-            pdf_text = latest_pdf.extracted_text
+    if latest_pdf and latest_pdf.extracted_text:
+        pdf_text = latest_pdf.extracted_text
 
+    # Handle new file upload
+    if uploaded_file:
 
+        saved_file = UploadedFile.objects.create(
+            chat=chat,
+            file=uploaded_file
+        )
 
+        if uploaded_file.name.lower().endswith(".pdf"):
 
+            try:
 
+                pdf_document = fitz.open(
+                    saved_file.file.path
+                )
 
-
-        if uploaded_file:
-
-            saved_file = UploadedFile.objects.create(
-                chat=chat,
-                file=uploaded_file
-            )
-
-            if uploaded_file.name.endswith(".pdf"):
-
-                pdf_path = saved_file.file.path
-
-                pdf_document = fitz.open(pdf_path)
-
-                for page in pdf_document:
-
-                    pdf_text += page.get_text()
-
-                pdf_document.close()
-
-                saved_file.extracted_text = pdf_text[:50000]
-
-                saved_file.save()
-
-            if uploaded_file.name.endswith(".pdf"):
-
-                pdf_path = saved_file.file.path
-
-                pdf_document = fitz.open(pdf_path)
+                pdf_text = ""
 
                 for page in pdf_document:
-
                     pdf_text += page.get_text()
 
                 pdf_document.close()
@@ -249,54 +234,65 @@ def send_message(request, chat_id):
                 saved_file.extracted_text = pdf_text[:50000]
                 saved_file.save()
 
-        if pdf_text and not user_message:
+            except Exception as e:
 
-            user_message = (
-                "Summarize this PDF "
-                "and explain the key concepts."
-            )
+                print("PDF Error:", e)
 
-        if chat.title == "New Chat" and user_message:
+                return JsonResponse({
+                    "bot_response":
+                    "⚠️ Unable to read PDF file."
+                })
 
-            words = user_message.split()
+    # If PDF uploaded without question
+    if pdf_text and not user_message:
 
-            chat.title = " ".join(words[:5])
+        user_message = (
+            "Summarize this PDF and explain "
+            "the key concepts."
+        )
 
-            chat.save()
+    # Auto rename first chat
+    if chat.title == "New Chat" and user_message:
 
-        conversation = []
+        words = user_message.split()
 
-        previous_messages = Message.objects.filter(
-            chat=chat
-        ).order_by("-created_at")[:10]
+        chat.title = " ".join(words[:5])
 
-        for msg in reversed(previous_messages):
+        chat.save()
 
-            conversation.append({
-                "role": "user",
-                "content": msg.user_message
-            })
+    # Build conversation memory
+    conversation = []
 
-            conversation.append({
-                "role": "assistant",
-                "content": msg.bot_response
-            })
+    previous_messages = Message.objects.filter(
+        chat=chat
+    ).order_by("-created_at")[:10]
 
+    for msg in reversed(previous_messages):
 
+        conversation.append({
+            "role": "user",
+            "content": msg.user_message
+        })
+
+        conversation.append({
+            "role": "assistant",
+            "content": msg.bot_response
+        })
+
+    # Add current message
     if pdf_text:
 
         conversation.append({
             "role": "user",
-            "content":
-            f"""
-            PDF CONTENT:
+            "content": f"""
+PDF CONTENT:
 
-            {pdf_text[:15000]}
+{pdf_text[:15000]}
 
-            USER QUESTION:
+USER QUESTION:
 
-            {user_message}
-            """
+{user_message}
+"""
         })
 
     else:
@@ -306,50 +302,47 @@ def send_message(request, chat_id):
             "content": user_message
         })
 
-        try:
+    try:
 
-            response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=conversation
-            )
+        client = get_groq_client()
 
-            bot_response = (
-                response.choices[0]
-                .message.content
-            )
-
-        except Exception as e:
-
-            print("Groq Error:", e)
-
-            error_text = str(e).lower()
-
-            if "rate limit" in error_text:
-
-                bot_response = (
-                    "⚠️ ChatGPT Jr AI limit reached. "
-                    "Please try again later."
-                )
-
-            else:
-
-                bot_response = (
-                    "⚠️ ChatGPT Jr encountered an error. "
-                    "Please try again."
-                )
-
-        Message.objects.create(
-            chat=chat,
-            user_message=user_message,
-            bot_response=bot_response
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=conversation
         )
 
-        return JsonResponse({
-            "user_message": user_message,
-            "bot_response": bot_response
-        })
+        bot_response = (
+            response.choices[0]
+            .message.content
+        )
+
+    except Exception as e:
+
+        print("Groq Error:", e)
+
+        error_text = str(e).lower()
+
+        if "rate limit" in error_text:
+
+            bot_response = (
+                "⚠️ ChatGPT Jr AI limit reached. "
+                "Please try again later."
+            )
+
+        else:
+
+            bot_response = (
+                "⚠️ ChatGPT Jr encountered an error. "
+                "Please try again."
+            )
+
+    Message.objects.create(
+        chat=chat,
+        user_message=user_message,
+        bot_response=bot_response
+    )
 
     return JsonResponse({
-        "error": "Invalid request"
+        "user_message": user_message,
+        "bot_response": bot_response
     })
-
