@@ -40,11 +40,6 @@ INSTALLED_APPS = [
     'chat',
     "django.contrib.sites",
 
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
-
-    "allauth.socialaccount.providers.google",
 ]
 
 MIDDLEWARE = [
@@ -55,7 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -135,14 +130,7 @@ LOGIN_REDIRECT_URL = "/"
 
 LOGOUT_REDIRECT_URL = "/login/"
 
-SITE_ID = 1
 
-AUTHENTICATION_BACKENDS = [
-
-    "django.contrib.auth.backends.ModelBackend",
-
-    "allauth.account.auth_backends.AuthenticationBackend",
-]
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"

@@ -1,7 +1,0 @@
-Django
-groq
-python-dotenv
-PyMuPDF
-gunicorn
-whitenoise
-markdown
