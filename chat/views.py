@@ -38,11 +38,11 @@ def register(request):
 
 load_dotenv()
 
-client = Groq(
-    api_key=os.getenv("GROQ_API_KEY")
-)
-
-
+def get_groq_client():
+    return Groq(
+        api_key=os.getenv("GROQ_API_KEY")
+    )
+client = get_groq_client()
 @login_required
 def home(request, chat_id=None):
 
